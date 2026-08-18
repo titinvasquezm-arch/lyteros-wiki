@@ -17,7 +17,7 @@ class WikiDB {
     async init() {
         try {
             console.log("Cargando datos desde data.json...");
-            const response = await fetch('data.json');
+            const response = await fetch('data.json?t=' + Date.now());
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
