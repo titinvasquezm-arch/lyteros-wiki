@@ -2816,46 +2816,55 @@ textarea.form-control {
     /* 7. Línea de Tiempo */
     .timeline-container {
         padding: 16px !important;
+        height: 100% !important;
+        overflow-y: auto !important;
+    }
+
+    .timeline-track-wrapper {
+        overflow-x: visible !important;
+        overflow-y: visible !important;
+        display: block !important;
         height: auto !important;
     }
 
     .timeline-events-list {
         height: auto !important;
         flex-direction: column !important;
-        gap: 40px !important;
-        padding: 40px 0 !important;
+        gap: 24px !important;
+        padding: 20px 0 !important;
     }
 
     .timeline-events-list::before {
-        left: 50% !important;
+        left: 24px !important;
         right: auto !important;
         top: 0 !important;
         bottom: 0 !important;
         width: 2px !important;
         height: 100% !important;
-        transform: translateX(-50%) !important;
+        transform: none !important;
     }
 
     .timeline-event-card {
         width: 100% !important;
         min-width: unset !important;
         height: auto !important;
+        align-items: flex-start !important;
+    }
+
+    .timeline-node {
+        display: none !important;
     }
 
     .timeline-event-card::after {
-        left: 50% !important;
-        top: auto !important;
-        bottom: auto !important;
-        transform: translateX(-50%) !important;
-        width: 0px !important; /* Desactivar líneas conectoras verticales en móvil */
-        height: 0px !important;
+        display: none !important;
     }
 
     .timeline-event-card:nth-child(odd) .timeline-card-content,
     .timeline-event-card:nth-child(even) .timeline-card-content {
         margin-top: 0 !important;
         margin-bottom: 0 !important;
-        width: 80% !important;
+        margin-left: 48px !important;
+        width: calc(100% - 64px) !important;
     }
 
     /* 8. Relaciones */
