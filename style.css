@@ -2636,3 +2636,249 @@ textarea.form-control {
     display: none !important;
 }
 
+/* ==========================================================================
+   DISEÑO RESPONSIVO (RESPONSIVE MOBILE DESIGN)
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* 1. Estructura Principal */
+    .app-container {
+        flex-direction: column !important;
+        height: 100vh !important;
+        width: 100vw !important;
+        overflow: hidden !important;
+    }
+
+    /* 2. Barra Superior (Sidebar en Móvil) */
+    .sidebar {
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .sidebar-header {
+        padding: 12px 16px !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .search-trigger {
+        margin: 8px 16px !important;
+        padding: 8px 12px !important;
+    }
+
+    .search-trigger .kbd {
+        display: none !important;
+    }
+
+    .sidebar-nav {
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        scrollbar-width: none; /* Ocultar scrollbar en firefox */
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
+        display: none; /* Ocultar scrollbar en chrome/safari */
+    }
+
+    .nav-item {
+        padding: 8px 14px !important;
+        font-size: 13px !important;
+        flex-shrink: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+    }
+
+    .sidebar-footer {
+        display: none !important; /* Ocultar en móvil para ganar espacio */
+    }
+
+    /* 3. Contenido Principal */
+    .main-content {
+        flex-grow: 1 !important;
+        overflow-y: auto !important;
+        height: calc(100vh - 120px) !important; /* Ajustar por la altura del sidebar superior */
+    }
+
+    /* 4. Panel de Control (Dashboard) */
+    .dashboard-grid {
+        padding: 16px !important;
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .col-span-2,
+    .col-span-3 {
+        grid-column: span 1 !important;
+    }
+
+    .stats-card {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+        padding: 16px !important;
+    }
+
+    .stat-val {
+        font-size: 28px !important;
+    }
+
+    .stat-lbl {
+        font-size: 11px !important;
+    }
+
+    /* 5. Enciclopedia (Wiki) */
+    .wiki-layout {
+        flex-direction: column !important;
+        height: 100% !important;
+    }
+
+    /* Ocultar explorador si hay un artículo activo */
+    .wiki-workspace:has(#wiki-active-editor:not(.hidden)) ~ .wiki-explorer,
+    .wiki-layout:has(#wiki-active-editor:not(.hidden)) .wiki-explorer {
+        display: none !important;
+    }
+
+    /* Ocultar el workspace si no hay artículo seleccionado */
+    .wiki-layout:has(#wiki-active-editor.hidden) .wiki-workspace {
+        display: none !important;
+    }
+
+    .wiki-explorer {
+        width: 100% !important;
+        height: 100% !important;
+        border-right: none !important;
+    }
+
+    .wiki-workspace {
+        width: 100% !important;
+        height: 100% !important;
+    }
+
+    .workspace-editor-container {
+        height: 100% !important;
+    }
+
+    .mobile-only-back {
+        display: inline-flex !important;
+    }
+
+    .workspace-header {
+        padding: 12px 16px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .workspace-title-area {
+        width: 100% !important;
+    }
+
+    .article-title-field {
+        font-size: 20px !important;
+    }
+
+    .workspace-actions {
+        display: flex !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+    }
+
+    .workspace-actions .btn {
+        flex-grow: 1 !important;
+        justify-content: center !important;
+    }
+
+    .workspace-body {
+        padding: 16px !important;
+    }
+
+    .preview-pane {
+        padding: 16px !important;
+    }
+
+    /* 6. Mapa */
+    .map-toolbar {
+        padding: 12px 16px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    .map-actions {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+
+    /* 7. Línea de Tiempo */
+    .timeline-container {
+        padding: 16px !important;
+        height: auto !important;
+    }
+
+    .timeline-events-list {
+        height: auto !important;
+        flex-direction: column !important;
+        gap: 40px !important;
+        padding: 40px 0 !important;
+    }
+
+    .timeline-events-list::before {
+        left: 50% !important;
+        right: auto !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        width: 2px !important;
+        height: 100% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .timeline-event-card {
+        width: 100% !important;
+        min-width: unset !important;
+        height: auto !important;
+    }
+
+    .timeline-event-card::after {
+        left: 50% !important;
+        top: auto !important;
+        bottom: auto !important;
+        transform: translateX(-50%) !important;
+        width: 0px !important; /* Desactivar líneas conectoras verticales en móvil */
+        height: 0px !important;
+    }
+
+    .timeline-event-card:nth-child(odd) .timeline-card-content,
+    .timeline-event-card:nth-child(even) .timeline-card-content {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        width: 80% !important;
+    }
+
+    /* 8. Relaciones */
+    .relations-layout {
+        flex-direction: column !important;
+        height: 100% !important;
+    }
+
+    .relations-sidebar {
+        width: 100% !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        padding: 16px !important;
+    }
+
+    .relations-canvas-panel {
+        padding: 16px !important;
+    }
+
+    .relations-list-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+}
+

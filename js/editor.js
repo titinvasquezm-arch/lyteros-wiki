@@ -110,6 +110,16 @@ class WikiEditor {
         if (this.imageUploadInput) {
             this.imageUploadInput.addEventListener('change', (e) => this.handleImageUpload(e));
         }
+
+        const mobileBackBtn = document.getElementById('wiki-mobile-back-btn');
+        if (mobileBackBtn) {
+            mobileBackBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.activeArticle = null;
+                this.activeEditor.classList.add('hidden');
+                this.emptyState.classList.remove('hidden');
+            });
+        }
     }
 
     async loadArticlesList(selectArticleId = null) {
