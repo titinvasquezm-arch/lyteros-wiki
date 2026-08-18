@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyteros Anvil - Worldbuilding Wiki</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet.js (Mapas) CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    
+    <!-- App CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="anvil" class="logo-icon"></i>
+                    <span class="logo-text">Lyteros Anvil</span>
+                </div>
+            </div>
+            
+            <div class="search-trigger" id="global-search-btn">
+                <i data-lucide="search" class="search-icon"></i>
+                <span class="search-placeholder">Buscar...</span>
+                <span class="kbd">Ctrl K</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Panel de Control</span>
+                </a>
+                <a href="#wiki" class="nav-item" data-view="wiki">
+                    <i data-lucide="book-open"></i>
+                    <span>Enciclopedia</span>
+                </a>
+                <a href="#map" class="nav-item" data-view="map">
+                    <i data-lucide="map"></i>
+                    <span>Mapa Mundi</span>
+                </a>
+                <a href="#timeline" class="nav-item" data-view="timeline">
+                    <i data-lucide="calendar"></i>
+                    <span>Cronología</span>
+                </a>
+                <a href="#relations" class="nav-item" data-view="relations">
+                    <i data-lucide="git-fork"></i>
+                    <span>Relaciones</span>
+                </a>
+                <a href="#graph" class="nav-item" data-view="graph">
+                    <i data-lucide="network"></i>
+                    <span>Grafo de Lore</span>
+                </a>
+                <a href="#settings" class="nav-item" data-view="settings">
+                    <i data-lucide="settings"></i>
+                    <span>Ajustes</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="current-world-info">
+                    <span class="world-label">Mundo Activo</span>
+                    <span class="world-name" id="active-world-name">El Reino de Lyteros</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT WORKSPACE -->
+        <main class="main-content">
+            <!-- VIEW: DASHBOARD -->
+            <section id="view-dashboard" class="view-panel active">
+                <div class="panel-header">
+                    <h1>Panel de Control</h1>
+                    <p class="panel-subtitle">El corazón del lore de tu universo.</p>
+                </div>
+                <div class="dashboard-grid">
+                    <!-- Stats Section -->
+                    <div class="dashboard-card stats-card col-span-3">
+                        <div class="stat-item">
+                            <span class="stat-val" id="stat-articles">0</span>
+                            <span class="stat-lbl">Artículos de Lore</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-val" id="stat-pins">0</span>
+                            <span class="stat-lbl">Puntos en el Mapa</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-val" id="stat-events">0</span>
+                            <span class="stat-lbl">Eventos Históricos</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-val" id="stat-relations">0</span>
+                            <span class="stat-lbl">Relaciones Enlazadas</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card quick-actions-card">
+                        <h3>Acciones Rápidas</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-icon" id="quick-create-article">
+                                <i data-lucide="plus"></i> Crear Artículo
+                            </button>
+                            <button class="btn btn-secondary btn-icon" id="quick-view-map">
+                                <i data-lucide="map-pin"></i> Explorar Mapa
+                            </button>
+                            <button class="btn btn-secondary btn-icon" id="quick-add-event">
+                                <i data-lucide="calendar-plus"></i> Registrar Evento
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Articles -->
+                    <div class="dashboard-card recent-card col-span-2">
+                        <h3>Artículos Recientes</h3>
+                        <div class="recent-list" id="recent-articles-list">
+                            <!-- Populated dynamically -->
+                            <p class="empty-state">No hay artículos creados aún.</p>
+                        </div>
+                    </div>
+
+                    <!-- World Meta -->
+                    <div class="dashboard-card world-meta-card col-span-3">
+                        <h3>Meta del Mundo</h3>
+                        <div class="world-meta-display" style="margin-top: 12px;">
+                            <h2 id="world-title-display" style="font-family: var(--font-header); font-size: 24px; color: var(--text-primary); margin-bottom: 8px;"></h2>
+                            <p id="world-desc-display" style="line-height: 1.6; color: var(--text-secondary); white-space: pre-wrap; font-size: 14px; font-family: var(--font-body);"></p>
+                        </div>
+                        <!-- Hidden inputs to prevent JS exceptions -->
+                        <div class="world-meta-editor" style="display: none !important;">
+                            <input type="text" id="world-title-input" value="">
+                            <textarea id="world-desc-input"></textarea>
+                            <button id="save-world-meta"></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: WIKI -->
+            <section id="view-wiki" class="view-panel">
+                <div class="wiki-layout">
+                    <!-- Left Sidebar (Articles Explorer) -->
+                    <div class="wiki-explorer">
+                        <div class="explorer-actions">
+                            <button class="btn btn-primary btn-block btn-icon" id="new-article-btn">
+                                <i data-lucide="plus-circle"></i> Nuevo Artículo
+                            </button>
+                        </div>
+                        <div class="explorer-filters">
+                            <input type="text" id="explorer-search" class="form-control search-small" placeholder="Filtrar por título...">
+                            <select id="explorer-template-filter" class="form-control filter-select">
+                                <option value="">Todos los tipos</option>
+                                <option value="character">Personajes</option>
+                                <option value="location">Ubicaciones</option>
+                                <option value="faction">Facciones</option>
+                                <option value="item">Objetos</option>
+                                <option value="event">Eventos</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                        <div class="explorer-tree" id="articles-tree-view">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Central Workspace (Editor/Reader) -->
+                    <div class="wiki-workspace" id="wiki-workspace-panel">
+                        <div class="workspace-empty-state" id="wiki-empty-state">
+                            <i data-lucide="book-open" class="empty-icon"></i>
+                            <h2>Selecciona o crea un artículo</h2>
+                            <p>Explora tu enciclopedia o crea un nuevo elemento de lore desde la barra lateral.</p>
+                        </div>
+
+                        <div class="workspace-editor-container hidden" id="wiki-active-editor">
+                            <!-- Editor Header -->
+                            <div class="workspace-header">
+                                <div class="workspace-title-area">
+                                    <input type="text" id="article-title-input" class="article-title-field" placeholder="Título del Artículo...">
+                                    <div class="article-meta-row">
+                                        <span class="badge" id="article-template-badge">Plantilla: General</span>
+                                        <span class="last-edited" id="article-edited-label">Última edición: hace un momento</span>
+                                    </div>
+                                </div>
+                                <div class="workspace-actions">
+                                    <div class="toggle-group">
+                                        <button class="btn-toggle active" id="btn-edit-mode"><i data-lucide="edit-3"></i> Editar</button>
+                                        <button class="btn-toggle" id="btn-preview-mode"><i data-lucide="eye"></i> Leer</button>
+                                    </div>
+                                    <button class="btn btn-success btn-icon" id="save-article-btn"><i data-lucide="save"></i> Guardar</button>
+                                    <button class="btn btn-danger btn-icon-only" id="delete-article-btn" title="Eliminar"><i data-lucide="trash-2"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Editor Body -->
+                            <div class="workspace-body">
+                                <!-- Mode: Edit -->
+                                <div class="editor-pane active" id="pane-edit">
+                                    <!-- Properties Form (World Anvil Style Metadata) -->
+                                    <div class="properties-box">
+                                        <div class="properties-box-header">
+                                            <i data-lucide="sliders"></i> Atributos Específicos
+                                            <span class="properties-toggle-btn" id="properties-toggle"><i data-lucide="chevron-down"></i></span>
+                                        </div>
+                                        <div class="properties-form-grid" id="article-properties-form">
+                                            <!-- Injected based on template type -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Main Markdown Text Area -->
+                                    <div class="textarea-wrapper">
+                                        <!-- Quick Format Toolbar -->
+                                        <div class="editor-toolbar" id="editor-format-toolbar">
+                                            <button type="button" class="toolbar-btn" data-format="bold" title="Negrita (Ctrl+B)"><i data-lucide="bold"></i></button>
+                                            <button type="button" class="toolbar-btn" data-format="italic" title="Cursiva (Ctrl+I)"><i data-lucide="italic"></i></button>
+                                            <div class="toolbar-divider"></div>
+                                            <button type="button" class="toolbar-btn" data-format="h1" title="Título 1">H1</button>
+                                            <button type="button" class="toolbar-btn" data-format="h2" title="Título 2">H2</button>
+                                            <button type="button" class="toolbar-btn" data-format="h3" title="Título 3">H3</button>
+                                            <div class="toolbar-divider"></div>
+                                            <button type="button" class="toolbar-btn" data-format="ul" title="Lista de viñetas"><i data-lucide="list"></i></button>
+                                            <button type="button" class="toolbar-btn" data-format="ol" title="Lista numerada"><i data-lucide="list-ordered"></i></button>
+                                            <button type="button" class="toolbar-btn" data-format="quote" title="Cita"><i data-lucide="quote"></i></button>
+                                            <button type="button" class="toolbar-btn" data-format="table" title="Tabla de Datos"><i data-lucide="table"></i></button>
+                                            <div class="toolbar-divider"></div>
+                                            <button type="button" class="toolbar-btn" data-format="link" title="Enlace Wiki (Ctrl+Shift+L)">[[ ]]</button>
+                                            <button type="button" class="toolbar-btn" data-format="image" title="Insertar Imagen"><i data-lucide="image"></i></button>
+                                        </div>
+                                        <textarea id="article-content-textarea" class="markdown-textarea" placeholder="Escribe el lore de tu artículo aquí en Markdown. Utiliza [[Nombre del Artículo]] para enlazarlos bidireccionalmente..."></textarea>
+                                        <!-- Hidden image upload input -->
+                                        <input type="file" id="editor-image-upload-input" accept="image/*" style="display: none;">
+                                        <!-- Autocomplete suggestions dropdown -->
+                                        <div class="autocomplete-suggestions hidden" id="autocomplete-box"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Mode: Preview/Read -->
+                                <div class="preview-pane" id="pane-preview">
+                                    <div class="preview-properties-row" id="article-properties-preview">
+                                        <!-- Metadata rendered visually -->
+                                    </div>
+                                    <div class="markdown-rendered" id="markdown-rendered-content">
+                                        <!-- Markdown HTML Injected -->
+                                    </div>
+
+                                    <!-- Backlinks & Linked Mentions -->
+                                    <div class="backlinks-section">
+                                        <h4><i data-lucide="link"></i> Menciones Vinculadas (Backlinks)</h4>
+                                        <div class="backlinks-list" id="article-backlinks-list">
+                                            <!-- Populated dynamically -->
+                                            <p class="empty-state-text">Ningún otro artículo enlaza a este todavía.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: MAP -->
+            <section id="view-map" class="view-panel">
+                <div class="map-layout">
+                    <!-- Map Toolbar -->
+                    <div class="map-toolbar">
+                        <div class="map-title-row">
+                            <h3><i data-lucide="map"></i> Mapas de Lore</h3>
+                            <select id="map-selector" class="form-control map-select-dropdown" style="max-width: 220px;"></select>
+                            <span class="map-badge" id="active-map-label">Mapa Activo: Mapa.jpg</span>
+                        </div>
+                        <div class="map-actions">
+                            <div class="tool-btn-group">
+                                <button class="btn btn-secondary btn-icon active" id="map-tool-view" title="Navegar por el mapa">
+                                    <i data-lucide="hand"></i> Navegar
+                                </button>
+                                <button class="btn btn-secondary btn-icon" id="map-tool-pin" title="Activa para colocar pines haciendo clic en el mapa">
+                                    <i data-lucide="map-pin"></i> Añadir Pin
+                                </button>
+                            </div>
+                            <button class="btn btn-secondary btn-icon" id="map-btn-fit" title="Ajustar mapa a la pantalla">
+                                <i data-lucide="maximize-2"></i> Ajustar
+                            </button>
+                            <button class="btn btn-secondary btn-icon" id="btn-open-upload-map">
+                                <i data-lucide="plus-circle"></i> Nuevo Mapa
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Map Leaflet Container -->
+                    <div class="map-container-wrapper">
+                        <div id="leaflet-map" class="leaflet-map-canvas"></div>
+                        
+                        <!-- Botón de retorno flotante -->
+                        <button id="map-back-btn" class="map-floating-back hidden">
+                            <i data-lucide="arrow-left"></i>
+                            <span>Volver</span>
+                        </button>
+
+
+                        <div class="map-overlay-instructions">
+                            <span>Modo Añadir Pin: Haz clic en cualquier lugar del mapa para colocar un marcador de lore. Arrastra para navegar.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: TIMELINE -->
+            <section id="view-timeline" class="view-panel">
+                <div class="panel-header-row">
+                    <div>
+                        <h1>Línea de Tiempo</h1>
+                        <p class="panel-subtitle">Los anales de la historia de tu mundo ordenados cronológicamente.</p>
+                    </div>
+                    <div class="header-actions" style="display: flex; gap: 12px; align-items: center;">
+                        <button class="btn btn-secondary btn-icon" id="manage-eras-btn">
+                            <i data-lucide="layers"></i> Gestionar Eras
+                        </button>
+                        <button class="btn btn-primary btn-icon" id="new-timeline-event-btn">
+                            <i data-lucide="calendar-plus"></i> Registrar Evento Histórico
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="timeline-container">
+                    <div class="timeline-filters">
+                        <input type="text" id="timeline-search" class="form-control" placeholder="Buscar en la historia...">
+                        <select id="timeline-era-filter" class="form-control">
+                            <option value="">Todas las Eras / Edades</option>
+                            <!-- Dynamically populated options -->
+                        </select>
+                    </div>
+                    
+                    <!-- Horizontal Timeline Track -->
+                    <div class="timeline-track-wrapper" id="timeline-track-wrapper">
+                        <div class="timeline-events-list" id="timeline-events-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: RELATIONS -->
+            <section id="view-relations" class="view-panel">
+                <div class="panel-header-row">
+                    <div>
+                        <h1>Red de Relaciones</h1>
+                        <p class="panel-subtitle">Mapa de interacciones, lealtades, enemistades y lazos de tu elenco.</p>
+                    </div>
+                    <button class="btn btn-primary btn-icon" id="add-relationship-btn">
+                        <i data-lucide="user-plus"></i> Vincular Relación
+                    </button>
+                </div>
+
+                <div class="relations-layout">
+                    <!-- Config Sidebar -->
+                    <div class="relations-sidebar">
+                        <h3>Gestor de Relaciones</h3>
+                        <p class="help-text">Define la conexión entre dos personajes para mapear sus lazos sociales y políticos.</p>
+                        
+                        <form id="relation-creator-form" class="relation-form">
+                            <div class="form-group">
+                                <label for="relation-source">Personaje Origen</label>
+                                <select id="relation-source" class="form-control" required>
+                                    <option value="">Selecciona personaje...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="relation-label">Relación (ej. Padre de, Aliado de, Enemigo de)</label>
+                                <input type="text" id="relation-label" class="form-control" placeholder="Enemigo de, Casado con, Hijo de..." required>
+                            </div>
+                            <div class="form-group">
+                                <label for="relation-target">Personaje Destino</label>
+                                <select id="relation-target" class="form-control" required>
+                                    <option value="">Selecciona personaje...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="relation-color">Color de Conexión</label>
+                                <select id="relation-color" class="form-control">
+                                    <option value="#ff4757">Rojo (Enemistad / Rivalidad)</option>
+                                    <option value="#2ed573">Verde (Familia / Alianza)</option>
+                                    <option value="#ffa502">Naranja (Comercio / Pacto)</option>
+                                    <option value="#5352ed">Azul (Lealtad / Jerarquía)</option>
+                                    <option value="#c5a059">Dorado (Sagrado / Especial)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Añadir Relación</button>
+                        </form>
+                    </div>
+
+                    <!-- Relationship Visual Web Panel -->
+                    <div class="relations-canvas-panel">
+                        <div class="relations-list-grid" id="relations-list-view">
+                            <!-- Populated dynamically as cards -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: GRAPH VIEW -->
+            <section id="view-graph" class="view-panel">
+                <div class="graph-layout">
+                    <div class="graph-toolbar">
+                        <h3><i data-lucide="network"></i> Grafo de Conexiones</h3>
+                        <p class="help-text">Visualización interactiva 2D del lore. Arrastra nodos para reposicionarlos y haz zoom para navegar.</p>
+                        <div class="graph-controls">
+                            <button class="btn btn-secondary btn-icon" id="graph-restart-simulation" title="Reiniciar Simulación">
+                                <i data-lucide="refresh-cw"></i> Recalcular
+                            </button>
+                            <label class="graph-control-checkbox">
+                                <input type="checkbox" id="graph-toggle-labels" checked>
+                                Mostrar Nombres
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Graph canvas container -->
+                    <div class="graph-container-wrapper" id="graph-canvas-container">
+                        <!-- D3 SVG appended here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- VIEW: SETTINGS -->
+            <section id="view-settings" class="view-panel">
+                <div class="panel-header">
+                    <h1>Ajustes</h1>
+                    <p class="panel-subtitle">Administra tu base de datos y la exportación del lore.</p>
+                </div>
+                
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Personalización y Temas</h3>
+                        <p class="card-desc">Elige la apariencia visual que mejor se adapte al tono de tu mundo fantástico o de ciencia ficción.</p>
+                        <div class="theme-selector-group">
+                            <button class="theme-btn active" data-theme="cosmic-dark" title="Cosmic Dark">
+                                <div class="theme-preview cosmic-dark-preview">
+                                    <span class="preview-dot" style="background: #0a0b0d;"></span>
+                                    <span class="preview-dot" style="background: #66fcf1;"></span>
+                                    <span class="preview-dot" style="background: #c5a059;"></span>
+                                </div>
+                                <span class="theme-label">Cosmic Dark</span>
+                            </button>
+                            <button class="theme-btn" data-theme="pergamino" title="Pergamino Antiguo">
+                                <div class="theme-preview pergamino-preview">
+                                    <span class="preview-dot" style="background: #f4edd8;"></span>
+                                    <span class="preview-dot" style="background: #8b5e3c;"></span>
+                                    <span class="preview-dot" style="background: #8b0000;"></span>
+                                </div>
+                                <span class="theme-label">Pergamino</span>
+                            </button>
+                            <button class="theme-btn" data-theme="pergamino-oscuro" title="Pergamino Oscuro">
+                                <div class="theme-preview pergamino-oscuro-preview">
+                                    <span class="preview-dot" style="background: #251e15;"></span>
+                                    <span class="preview-dot" style="background: #8c5c32;"></span>
+                                    <span class="preview-dot" style="background: #a82b2b;"></span>
+                                </div>
+                                <span class="theme-label">P. Oscuro</span>
+                            </button>
+                            <button class="theme-btn" data-theme="terminal-hacker" title="Terminal Hacker">
+                                <div class="theme-preview terminal-hacker-preview">
+                                    <span class="preview-dot" style="background: #050505;"></span>
+                                    <span class="preview-dot" style="background: #00ff66;"></span>
+                                    <span class="preview-dot" style="background: #00cc55;"></span>
+                                </div>
+                                <span class="theme-label">Hacker</span>
+                            </button>
+                            <button class="theme-btn" data-theme="rustic" title="Tema Rústico">
+                                <div class="theme-preview rustic-preview">
+                                    <span class="preview-dot" style="background: #1b1c1e;"></span>
+                                    <span class="preview-dot" style="background: #d46a3b;"></span>
+                                    <span class="preview-dot" style="background: #9e2a2b;"></span>
+                                </div>
+                                <span class="theme-label">Rustic</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card" style="display: none !important;">
+                        <h3>Backup e Intercambio</h3>
+                        <p class="card-desc">Exporta todo tu proyecto de lore a un archivo portable JSON, o importa un mundo previamente guardado.</p>
+                        <div class="settings-actions-group">
+                            <button class="btn btn-primary btn-icon" id="settings-export-btn">
+                                <i data-lucide="download"></i> Exportar Mundo (.json)
+                            </button>
+                            <label class="btn btn-secondary btn-icon" id="settings-import-label">
+                                <i data-lucide="upload"></i> Importar Mundo
+                                <input type="file" id="settings-import-input" accept=".json" style="display: none;">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card warning-card" style="display: none !important;">
+                        <h3>Zona de Peligro</h3>
+                        <p class="card-desc">Estas acciones pueden borrar tu lore de forma permanente. Procede con precaución.</p>
+                        <div class="settings-actions-group">
+                            <button class="btn btn-danger btn-icon" id="settings-reset-mock-btn">
+                                <i data-lucide="rotate-ccw"></i> Reestablecer Mundo de Muestra
+                            </button>
+                            <button class="btn btn-danger btn-icon" id="settings-clear-btn">
+                                <i data-lucide="trash-2"></i> Borrar Todo el Lore
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ================== MODALES ================== -->
+
+    <!-- MODAL: BÚSQUEDA GLOBAL (Ctrl+K) -->
+    <div class="modal-backdrop hidden" id="modal-search">
+        <div class="modal-dialog modal-search-dialog">
+            <div class="modal-search-header">
+                <i data-lucide="search" class="search-modal-icon"></i>
+                <input type="text" id="modal-search-input" placeholder="Buscar personajes, lugares, eventos, facciones..." autocomplete="off">
+                <span class="esc-badge">ESC</span>
+            </div>
+            <div class="modal-search-results" id="modal-search-results-list">
+                <!-- Search items appear here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREAR NUEVO PIN / ARTÍCULO EN EL MAPA -->
+    <div class="modal-backdrop hidden" id="modal-map-pin">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Añadir Punto de Interés al Mapa</h3>
+                <button class="btn-close" id="modal-map-pin-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="map-pin-form">
+                    <input type="hidden" id="pin-coord-lat">
+                    <input type="hidden" id="pin-coord-lng">
+                    
+                    <div class="form-group">
+                        <label for="pin-title">Nombre del Lugar / Marcador</label>
+                        <input type="text" id="pin-title" class="form-control" placeholder="Ej. Ciudadela del Alba" required>
+                    </div>
+
+
+
+                    <div class="form-group">
+                        <label for="pin-link-select">Vincular a Artículo Existente</label>
+                        <select id="pin-link-select" class="form-control">
+                            <option value="">-- Crear Nuevo Artículo para este Pin --</option>
+                            <!-- Populated with articles -->
+                        </select>
+                        <p class="help-text">Si dejas esto en blanco, se creará automáticamente un artículo de tipo Ubicación con el nombre del marcador.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pin-link-map-select">Enlazar a otro Mapa (Jerárquico)</label>
+                        <select id="pin-link-map-select" class="form-control">
+                            <option value="">-- No enlazar a mapa --</option>
+                            <!-- Populated with maps -->
+                        </select>
+                        <p class="help-text">Permite hacer clic en este pin para abrir otro mapa en la jerarquía (ej. plano de una ciudad).</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pin-color">Color del Pin</label>
+                        <select id="pin-color" class="form-control">
+                            <option value="red">Rojo (Ciudad / Fuerte)</option>
+                            <option value="blue">Azul (Puerto / Agua)</option>
+                            <option value="green">Verde (Bosque / Naturaleza)</option>
+                            <option value="orange">Naranja (Montaña / Mina)</option>
+                            <option value="purple">Púrpura (Ruina / Magia)</option>
+                            <option value="gold">Dorado (Maravilla / Especial)</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="modal-map-pin-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Pin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SUBIR NUEVO MAPA -->
+    <div class="modal-backdrop hidden" id="modal-upload-map">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Subir Nuevo Mapa</h3>
+                <button class="btn-close" id="modal-upload-map-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="upload-map-form">
+                    <div class="form-group">
+                        <label for="upload-map-name">Nombre del Mapa</label>
+                        <input type="text" id="upload-map-name" class="form-control" placeholder="Ej. Ciudadela del Alba (Detalle)" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="upload-map-parent">Mapa Padre (Jerarquía)</label>
+                        <select id="upload-map-parent" class="form-control">
+                            <option value="">-- Ninguno (Mapa Principal) --</option>
+                            <!-- Populated with maps -->
+                        </select>
+                        <p class="help-text">Establece la relación jerárquica para permitir volver al mapa superior fácilmente.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upload-map-file">Archivo de Imagen del Mapa</label>
+                        <input type="file" id="upload-map-file" class="form-control" accept="image/*" required>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="modal-upload-map-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Crear Mapa</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR EVENTO HISTÓRICO -->
+    <div class="modal-backdrop hidden" id="modal-timeline-event">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3>Registrar Evento Histórico</h3>
+                <button class="btn-close" id="modal-timeline-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="timeline-event-form">
+                    <div class="form-group">
+                        <label for="event-year">Año / Época (admite números negativos para A.C.)</label>
+                        <input type="number" id="event-year" class="form-control" placeholder="Ej. 1240" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="event-title">Nombre del Evento</label>
+                        <input type="text" id="event-title" class="form-control" placeholder="Ej. El Gran Cataclismo" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-era">Era del Evento (Opcional)</label>
+                        <select id="event-era" class="form-control">
+                            <option value="">Sin Era / Era General</option>
+                            <!-- Populated with eras -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-desc">Breve descripción del suceso</label>
+                        <textarea id="event-desc" class="form-control" rows="3" placeholder="Describe qué ocurrió y su impacto..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-article-link">Vincular a Artículo Wiki</label>
+                        <select id="event-article-link" class="form-control">
+                            <option value="">No vincular</option>
+                            <!-- Populated with articles -->
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="modal-timeline-cancel">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar Evento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: GESTIONAR ERAS -->
+    <div class="modal-backdrop hidden" id="modal-manage-eras">
+        <div class="modal-dialog" style="width: 550px;">
+            <div class="modal-header">
+                <h3>Gestionar Eras Históricas</h3>
+                <button class="btn-close" id="modal-eras-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="help-text" style="margin-bottom: 16px; font-size: 13px; color: var(--text-secondary);">
+                    Define las eras de tu mundo y ordénalas. La primera era de la lista ocurrirá antes que la segunda, y así sucesivamente. Esto ordenará los eventos del timeline de forma coherente (ej. año 1 de la Era 2 después de año 99 de la Era 1).
+                </p>
+                
+                <!-- Formulario para Añadir Era -->
+                <form id="new-era-form" style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <input type="text" id="new-era-name" class="form-control" placeholder="Nombre de la era (ej. Segunda Edad)" required style="flex: 2;">
+                    <input type="text" id="new-era-abbrev" class="form-control" placeholder="Abrev. (ej. S.E.)" style="flex: 1; max-width: 120px;">
+                    <button type="submit" class="btn btn-primary" style="white-space: nowrap; padding: 0 16px;">
+                        Añadir Era
+                    </button>
+                </form>
+                
+                <!-- Lista de Eras con Ordenamiento y Acciones -->
+                <div class="eras-list-wrapper" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-surface-elevated);">
+                    <ul id="eras-list-container" style="list-style: none; padding: 0; margin: 0;">
+                        <!-- Dynamically populated eras -->
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="modal-eras-done">Listo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================== CARGAR SCRIPTS ================== -->
+    <!-- Librerías de Terceros (CDNs) -->
+    <!-- Leaflet JS (Mapas) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <!-- D3.js (Grafo) -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- Marked.js (Markdown Renderer) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- Módulos de la Aplicación -->
+    <script type="module" src="js/db.js"></script>
+    <script type="module" src="js/templates.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/mockData.js"></script>
+    <script type="module" src="js/editor.js"></script>
+    <script type="module" src="js/map.js"></script>
+    <script type="module" src="js/graph.js"></script>
+    <script type="module" src="js/timeline.js"></script>
+    <script type="module" src="js/relations.js"></script>
+    <script type="module" src="app.js?v=1.4"></script>
+</body>
+</html>
