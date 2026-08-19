@@ -1060,7 +1060,7 @@ textarea.form-control {
     border-top-right-radius: 0;
     padding: 20px;
     color: var(--text-primary);
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.6;
     resize: none;
     outline: none;
@@ -1138,7 +1138,7 @@ textarea.form-control {
 
 .markdown-rendered {
     line-height: 1.7;
-    font-size: 15px;
+    font-size: 18px;
     color: var(--text-primary);
     margin-bottom: 40px;
 }
