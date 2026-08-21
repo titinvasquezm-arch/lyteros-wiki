@@ -565,7 +565,7 @@
     <div class="modal-backdrop hidden" id="modal-map-pin">
         <div class="modal-dialog">
             <div class="modal-header">
-                <h3>Añadir Punto de Interés al Mapa</h3>
+                <h3 id="modal-map-pin-title">Añadir Punto de Interés al Mapa</h3>
                 <button class="btn-close" id="modal-map-pin-close">&times;</button>
             </div>
             <div class="modal-body">
@@ -578,15 +578,19 @@
                         <input type="text" id="pin-title" class="form-control" placeholder="Ej. Ciudadela del Alba" required>
                     </div>
 
-
+                    <div class="form-group">
+                        <label for="pin-description">Descripción Corta / Lore rápido</label>
+                        <textarea id="pin-description" class="form-control" placeholder="Ej. Breve lore o anotación sobre este lugar..." rows="2" style="resize: none;"></textarea>
+                    </div>
 
                     <div class="form-group">
-                        <label for="pin-link-select">Vincular a Artículo Existente</label>
+                        <label for="pin-link-select">Vincular a Artículo de la Wiki</label>
                         <select id="pin-link-select" class="form-control">
-                            <option value="">-- Crear Nuevo Artículo para este Pin --</option>
+                            <option value="new">-- Crear Nuevo Artículo automáticamente --</option>
+                            <option value="none">-- No vincular artículo (Solo marcador) --</option>
                             <!-- Populated with articles -->
                         </select>
-                        <p class="help-text">Si dejas esto en blanco, se creará automáticamente un artículo de tipo Ubicación con el nombre del marcador.</p>
+                        <p class="help-text">Enlaza este pin a un artículo del lore para acceder a su enciclopedia detallada.</p>
                     </div>
 
                     <div class="form-group">

@@ -31,9 +31,12 @@ class WikiMap {
         this.pinLatInput = document.getElementById('pin-coord-lat');
         this.pinLngInput = document.getElementById('pin-coord-lng');
         this.pinTitleInput = document.getElementById('pin-title');
+        this.pinDescriptionInput = document.getElementById('pin-description');
         this.pinLinkSelect = document.getElementById('pin-link-select');
         this.pinLinkMapSelect = document.getElementById('pin-link-map-select');
         this.pinColorSelect = document.getElementById('pin-color');
+        this.modalPinTitle = document.getElementById('modal-map-pin-title');
+        this.editingPinId = null;
         
         this.modalClose = document.getElementById('modal-map-pin-close');
         this.modalCancel = document.getElementById('modal-map-pin-cancel');
@@ -209,9 +212,9 @@ class WikiMap {
             const marker = L.marker([pin.lat, pin.lng], { icon: customIcon }).addTo(this.map);
 
             // Popup HTML
-            const descSnippet = article 
+            const descSnippet = pin.description || (article 
                 ? (article.content.substring(0, 100).replace(/[#*`_\[\]]/g, '') + '...') 
-                : 'Sin artículo asociado.';
+                : 'Sin artículo asociado.');
 
             const popupContent = document.createElement('div');
             popupContent.className = 'map-popup-card';
@@ -230,16 +233,27 @@ class WikiMap {
                 <div class="popup-links-container">
                     ${linksHtml}
                 </div>
-                <button class="btn-delete-pin" style="
-                    background: transparent;
-                    border: none;
-                    color: #ff4757;
-                    font-size: 10px;
-                    cursor: pointer;
-                    margin-top: 6px;
-                    align-self: flex-start;
-                    padding: 0;
-                ">Eliminar Pin</button>
+                <div style="display: flex; gap: 8px; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 6px;">
+                    <button class="btn-edit-pin" style="
+                        background: transparent;
+                        border: none;
+                        color: var(--accent-cyan);
+                        font-size: 10px;
+                        cursor: pointer;
+                        padding: 0;
+                        font-weight: 600;
+                    ">Editar</button>
+                    <span style="color: var(--text-muted); font-size: 10px;">|</span>
+                    <button class="btn-delete-pin" style="
+                        background: transparent;
+                        border: none;
+                        color: #ff4757;
+                        font-size: 10px;
+                        cursor: pointer;
+                        padding: 0;
+                        font-weight: 600;
+                    ">Eliminar</button>
+                </div>
             `;
 
             if (pin.linkId) {
@@ -255,6 +269,11 @@ class WikiMap {
                     this.navigateToMap(pin.linkMapId);
                 });
             }
+
+            popupContent.querySelector('.btn-edit-pin').addEventListener('click', (e) => {
+                e.preventDefault();
+                this.openEditPinModal(pin);
+            });
 
             popupContent.querySelector('.btn-delete-pin').addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -289,13 +308,20 @@ class WikiMap {
     handleMapClick(e) {
         if (this.currentTool !== 'pin') return;
 
-        // Abrir modal de nuevo pin
+        // Resetear a modo creación
+        this.editingPinId = null;
+        this.modalPinTitle.textContent = 'Añadir Punto de Interés al Mapa';
+        
         this.pinLatInput.value = e.latlng.lat;
         this.pinLngInput.value = e.latlng.lng;
         this.pinTitleInput.value = '';
+        this.pinDescriptionInput.value = '';
         this.pinLinkMapSelect.value = '';
+        this.pinColorSelect.value = 'red';
         
-        this.populateArticlesSelect();
+        this.populateArticlesSelect().then(() => {
+            this.pinLinkSelect.value = 'new';
+        });
         this.updateMapSelectorOptions();
 
         this.modalPin.classList.remove('hidden');
@@ -303,7 +329,10 @@ class WikiMap {
 
     async populateArticlesSelect() {
         const articles = await db.getAllArticles();
-        this.pinLinkSelect.innerHTML = `<option value="">-- Crear Nuevo Artículo para este Pin --</option>`;
+        this.pinLinkSelect.innerHTML = `
+            <option value="new">-- Crear Nuevo Artículo automáticamente --</option>
+            <option value="none">-- No vincular artículo (Solo marcador) --</option>
+        `;
         articles.sort((a,b) => a.title.localeCompare(b.title)).forEach(art => {
             this.pinLinkSelect.innerHTML += `<option value="${art.id}">${art.title}</option>`;
         });
@@ -318,6 +347,7 @@ class WikiMap {
         e.preventDefault();
         
         const title = this.pinTitleInput.value.trim();
+        const description = this.pinDescriptionInput.value.trim();
         const lat = parseFloat(this.pinLatInput.value);
         const lng = parseFloat(this.pinLngInput.value);
         let linkId = this.pinLinkSelect.value;
@@ -326,38 +356,81 @@ class WikiMap {
 
         if (!title) return;
 
-        if (!linkId) {
+        // Resolver la ID del enlace del artículo
+        if (linkId === 'new') {
             linkId = slugify(title);
-            const newArt = {
-                id: linkId,
-                title: title,
-                type: 'location',
-                content: `# ${title}\n\nEste lugar fue marcado en el mapa.\n\n## Descripción\nEscribe el lore de este sitio aquí...`,
-                metadata: {
-                    type: 'Punto de Interés',
-                    danger_level: 'Moderado'
-                },
-                tags: ['geografía', 'punto-de-interes'],
-                updatedAt: Date.now()
-            };
-            await db.saveArticle(newArt);
+            // Comprobar si ya existe
+            const articles = await db.getAllArticles();
+            const exists = articles.some(art => art.id === linkId);
+            if (!exists) {
+                const newArt = {
+                    id: linkId,
+                    title: title,
+                    type: 'location',
+                    content: `# ${title}\n\nEste lugar fue marcado en el mapa.\n\n## Descripción\nEscribe el lore de este sitio aquí...`,
+                    metadata: {
+                        type: 'Punto de Interés',
+                        danger_level: 'Moderado'
+                    },
+                    tags: ['geografía', 'punto-de-interes'],
+                    updatedAt: Date.now()
+                };
+                await db.saveArticle(newArt);
+            }
+        } else if (linkId === 'none') {
+            linkId = null;
         }
 
-        const newPin = { 
-            lat, 
-            lng, 
-            title, 
-            linkId, 
+        const pinData = {
+            lat,
+            lng,
+            title,
+            description: description || null,
+            linkId: linkId || null,
             color,
             linkMapId: linkMapId || null,
             mapId: this.currentMapId
         };
-        await db.savePin(newPin);
+
+        if (this.editingPinId) {
+            pinData.id = this.editingPinId;
+        }
+
+        await db.savePin(pinData);
 
         this.closeModal();
         this.loadPins();
         
-        this.onNavigateToArticle(null); 
+        // Notificar cambio de artículos si creamos uno nuevo
+        if (this.pinLinkSelect.value === 'new') {
+            this.onNavigateToArticle(null); 
+        }
+    }
+
+    async openEditPinModal(pin) {
+        this.editingPinId = pin.id;
+        this.modalPinTitle.textContent = 'Editar Punto de Interés';
+        
+        this.pinLatInput.value = pin.lat;
+        this.pinLngInput.value = pin.lng;
+        this.pinTitleInput.value = pin.title;
+        this.pinDescriptionInput.value = pin.description || '';
+        this.pinColorSelect.value = pin.color || 'red';
+        
+        await this.populateArticlesSelect();
+        this.updateMapSelectorOptions();
+        
+        // Cargar enlace de mapa
+        this.pinLinkMapSelect.value = pin.linkMapId || '';
+        
+        // Cargar enlace de artículo
+        if (pin.linkId) {
+            this.pinLinkSelect.value = pin.linkId;
+        } else {
+            this.pinLinkSelect.value = 'none';
+        }
+        
+        this.modalPin.classList.remove('hidden');
     }
 
     // Navegación jerárquica
