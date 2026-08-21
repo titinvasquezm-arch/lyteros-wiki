@@ -66,6 +66,18 @@ export const TEMPLATES = {
             { key: 'participants', label: 'Participantes Clave', type: 'text', placeholder: 'Ej. Rey Valerius, Lord Malakor' },
             { key: 'outcome', label: 'Resultado', type: 'text', placeholder: 'Ej. Victoria del Imperio del Sol, Tratado de Paz' }
         ]
+    },
+    race: {
+        key: 'race',
+        label: 'Raza / Especie',
+        icon: 'dna',
+        fields: [
+            { key: 'average_lifespan', label: 'Esperanza de Vida', type: 'text', placeholder: 'Ej. 80 años, Inmortales' },
+            { key: 'homeland', label: 'Territorio / Origen', type: 'text', placeholder: 'Ej. Gran Bosque, Planos Astrales' },
+            { key: 'languages', label: 'Idiomas Comunes', type: 'text', placeholder: 'Ej. Común, Élfico, Rúnico' },
+            { key: 'ancestry_traits', label: 'Rasgos Raciales', type: 'text', placeholder: 'Ej. Visión nocturna, Resistencia al fuego' },
+            { key: 'distinguishing_features', label: 'Rasgos Físicos', type: 'text', placeholder: 'Ej. Orejas puntiagudas, Piel pálida' }
+        ]
     }
 };
 
