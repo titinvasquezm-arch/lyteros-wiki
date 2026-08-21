@@ -233,27 +233,6 @@ class WikiMap {
                 <div class="popup-links-container">
                     ${linksHtml}
                 </div>
-                <div style="display: flex; gap: 8px; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 6px;">
-                    <button class="btn-edit-pin" style="
-                        background: transparent;
-                        border: none;
-                        color: var(--accent-cyan);
-                        font-size: 10px;
-                        cursor: pointer;
-                        padding: 0;
-                        font-weight: 600;
-                    ">Editar</button>
-                    <span style="color: var(--text-muted); font-size: 10px;">|</span>
-                    <button class="btn-delete-pin" style="
-                        background: transparent;
-                        border: none;
-                        color: #ff4757;
-                        font-size: 10px;
-                        cursor: pointer;
-                        padding: 0;
-                        font-weight: 600;
-                    ">Eliminar</button>
-                </div>
             `;
 
             if (pin.linkId) {
@@ -269,19 +248,6 @@ class WikiMap {
                     this.navigateToMap(pin.linkMapId);
                 });
             }
-
-            popupContent.querySelector('.btn-edit-pin').addEventListener('click', (e) => {
-                e.preventDefault();
-                this.openEditPinModal(pin);
-            });
-
-            popupContent.querySelector('.btn-delete-pin').addEventListener('click', async (e) => {
-                e.preventDefault();
-                if (confirm(`¿Deseas eliminar el marcador "${pin.title}"?`)) {
-                    await db.deletePin(pin.id);
-                    this.loadPins();
-                }
-            });
 
             marker.bindPopup(popupContent);
             
