@@ -18,9 +18,14 @@ class AppController {
     constructor() {
         this.activeView = 'dashboard';
         
-        // Cargar tema inmediatamente para evitar parpadeos
+        // Cargar tema e inicializar fuentes inmediatamente para evitar saltos visuales
         this.currentTheme = localStorage.getItem('lyteros_theme') || 'cosmic-dark';
         document.documentElement.setAttribute('data-theme', this.currentTheme);
+
+        this.generalFontSize = localStorage.getItem('lyteros_fontsize_general') || '15';
+        this.wikiFontSize = localStorage.getItem('lyteros_fontsize_wiki') || '18';
+        document.documentElement.style.setProperty('--font-size-general', this.generalFontSize + 'px');
+        document.documentElement.style.setProperty('--font-size-wiki', this.wikiFontSize + 'px');
         
         // DOM
         this.navLinks = document.querySelectorAll('.sidebar-nav .nav-item');
@@ -159,6 +164,9 @@ class AppController {
                 this.setTheme(selectedTheme);
             });
         });
+
+        // Inicializar controles de tamaño de fuente
+        this.initFontSizeControls();
     }
 
     setTheme(themeName) {
@@ -192,6 +200,37 @@ class AppController {
             }
         } catch (err) {
             console.error("Error al actualizar grafo en cambio de tema:", err);
+        }
+    }
+
+    initFontSizeControls() {
+        const generalInput = document.getElementById('font-size-general-input');
+        const generalVal = document.getElementById('font-size-general-val');
+        const wikiInput = document.getElementById('font-size-wiki-input');
+        const wikiVal = document.getElementById('font-size-wiki-val');
+
+        if (generalInput) {
+            generalInput.value = this.generalFontSize;
+            generalVal.textContent = this.generalFontSize + 'px';
+            generalInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                generalVal.textContent = val + 'px';
+                this.generalFontSize = val;
+                document.documentElement.style.setProperty('--font-size-general', val + 'px');
+                localStorage.setItem('lyteros_fontsize_general', val);
+            });
+        }
+
+        if (wikiInput) {
+            wikiInput.value = this.wikiFontSize;
+            wikiVal.textContent = this.wikiFontSize + 'px';
+            wikiInput.addEventListener('input', (e) => {
+                const val = e.target.value;
+                wikiVal.textContent = val + 'px';
+                this.wikiFontSize = val;
+                document.documentElement.style.setProperty('--font-size-wiki', val + 'px');
+                localStorage.setItem('lyteros_fontsize_wiki', val);
+            });
         }
     }
 

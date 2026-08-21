@@ -487,6 +487,31 @@
                                 <span class="theme-label">Rustic</span>
                             </button>
                         </div>
+                        
+                        <!-- Ajuste de tamaños de fuente -->
+                        <div class="font-size-settings" style="margin-top: 24px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                            <h4 style="margin-bottom: 8px; font-size: 15px; color: var(--text-primary); font-family: var(--font-heading); display: flex; align-items: center; gap: 6px;">
+                                <i data-lucide="type" style="width: 16px; height: 16px;"></i> Tamaño de Fuente
+                            </h4>
+                            <p class="card-desc" style="margin-bottom: 16px;">Ajusta de forma independiente la escala del texto de la interfaz general y de la enciclopedia (editor y lectura).</p>
+                            
+                            <div class="font-size-control-group" style="display: flex; gap: 24px; flex-wrap: wrap;">
+                                <div class="font-size-control-item" style="flex: 1; min-width: 150px;">
+                                    <label for="font-size-general-input" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <span>Interfaz General</span>
+                                        <span id="font-size-general-val">15px</span>
+                                    </label>
+                                    <input type="range" id="font-size-general-input" min="12" max="22" value="15" style="width: 100%; accent-color: var(--accent-cyan); cursor: pointer;">
+                                </div>
+                                <div class="font-size-control-item" style="flex: 1; min-width: 150px;">
+                                    <label for="font-size-wiki-input" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <span>Enciclopedia (Lore)</span>
+                                        <span id="font-size-wiki-val">18px</span>
+                                    </label>
+                                    <input type="range" id="font-size-wiki-input" min="14" max="26" value="18" style="width: 100%; accent-color: var(--accent-cyan); cursor: pointer;">
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="settings-card" style="display: none !important;">
